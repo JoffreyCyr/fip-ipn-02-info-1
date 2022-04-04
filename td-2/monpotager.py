@@ -1,59 +1,35 @@
-
 from argparse import ArgumentTypeError
-
-from sympy import false
 
 
 class Primeur():
 
     _nom = ""
-    _potager = []
+    _potager = None
 
     def __init__(self, nom = "Gerard"):
         self._nom = nom
         print("bonjour je m'appelle %s " % self._nom)
 
-    def plante(self, fruitOuLegume):
-        if isinstance(fruitOuLegume, (Fruit, Legume)) == False:
+    def entreDansUnPotager(self, potager):
+        if isinstance(potager, Potager) == False:
             raise ArgumentTypeError
-        
-        zoneLegume = list(filter(lambda z: isinstance(z, ZoneLegumes), self._potager))
-        zoneFruit = list(filter(lambda z: isinstance(z, ZoneFruits), self._potager))
 
-        if isinstance(fruitOuLegume, Fruit) and len(zoneFruit) > 0:
-            zoneFruit[0]._fruits.append(fruitOuLegume)
-            print("fruit %s ajouté dans la zone %s" % (fruitOuLegume._nom, zoneFruit[0]._nom))
-            return
-        
-        if isinstance(fruitOuLegume, Legume) and len(zoneLegume) > 0:
-            zoneLegume[0]._legumes.append(fruitOuLegume)
-            print("legume %s ajouté dans la zone %s" % (fruitOuLegume._nom, zoneLegume[0]._nom))
-            return
+        self._potager = potager
 
-        raise Exception("instance %s non ajoutée, la zone n'existe pas!" % fruitOuLegume._nom)
-            
+    def sortDunPotager(self):
+        self._potager = None
 
-    def arroseZone(self, zone):
-        raise NotImplementedError
+    def plante(self, fruitOuLegume):
+        if isinstance(self._potager, Potager) == False:
+            raise ArgumentTypeError
+
+        self._potager._plante(fruitOuLegume)
 
     def ajouteZone(self, zone):
-        if isinstance(zone, Zone) == False:
+        if isinstance(self._potager, Potager) == False:
             raise ArgumentTypeError
-        
-        if len(self._potager) >= 2:
-            raise Exception('trop de zones !')
 
-        if len(self._potager) == 0:
-            self._potager.append(zone)
-            print("zone %s ajoutée" % zone._nom)
-            return
-        
-        filtered = filter(lambda z: isinstance(z, type(zone)), self._potager)
-        if len(list(filtered)) > 0:
-            raise Exception('meme zone en cours d\'ajout! %s' % type(zone))
-        else:
-            self._potager.append(zone)
-            print("zone %s ajoutée" % zone._nom)
+        self._potager._ajouteZone(zone)
             
 class Zone():
 
@@ -63,6 +39,10 @@ class Zone():
     def __init__(self, largeur, longueur):
         self._largeur = largeur
         self._longueur = longueur
+
+    @property
+    def aire(self):
+        return self.largeur * self.largeur
 
     @property
     def largeur(self):
@@ -79,6 +59,62 @@ class Zone():
     @longueur.setter
     def longueur(self, longueur):
         self._longueur = longueur
+
+class Potager(Zone):
+    _zones = []
+
+    def __init__(self, largeur, longueur):
+        super().__init__(largeur, longueur)
+
+    def _plante(self, fruitOuLegume):
+        if isinstance(fruitOuLegume, (Fruit, Legume)) == False:
+            raise ArgumentTypeError
+        
+        zoneLegume = list(filter(lambda z: isinstance(z, ZoneLegumes), self._zones))
+        zoneFruit = list(filter(lambda z: isinstance(z, ZoneFruits), self._zones))
+
+        if isinstance(fruitOuLegume, Fruit) and len(zoneFruit) > 0:
+            zoneFruit[0]._fruits.append(fruitOuLegume)
+            print("fruit %s ajouté dans la zone %s" % (fruitOuLegume._nom, zoneFruit[0]._nom))
+            return
+        
+        if isinstance(fruitOuLegume, Legume) and len(zoneLegume) > 0:
+            zoneLegume[0]._legumes.append(fruitOuLegume)
+            print("legume %s ajouté dans la zone %s" % (fruitOuLegume._nom, zoneLegume[0]._nom))
+            return
+
+        raise Exception("instance %s non ajoutée, la zone n'existe pas!" % fruitOuLegume._nom)
+
+    def _verificationAireAvantAjout(self, zone):
+        if isinstance(zone, Zone) == False:
+            raise ArgumentTypeError
+
+        aireZones = 0 
+        for z in self._zones:
+            aireZones += z.aire
+
+        if aireZones + zone.aire > self.aire:
+            raise Exception("nous ne pouvons pas ajouter la zone, plus d'espace disponible")
+        else:
+            self._zones.append(zone)
+            print("zone %s ajoutée!" % zone._nom)
+
+    def _ajouteZone(self, zone):
+        if isinstance(zone, Zone) == False:
+            raise ArgumentTypeError
+        
+        if len(self._zones) >= 2:
+            raise Exception('trop de zones !')
+
+        if len(self._zones) == 0:
+            self._verificationAireAvantAjout(zone)
+            return
+        
+        filtered = filter(lambda z: isinstance(z, type(zone)), self._zones)
+        if len(list(filtered)) > 0:
+            raise Exception('meme zone en cours d\'ajout! %s' % type(zone))
+        else:
+            self._verificationAireAvantAjout(zone)
 
 class ZoneLegumes(Zone):
     _nom = "Mes Legumes"
@@ -110,22 +146,25 @@ class Legume():
 ### MAIN ###
 if __name__ == '__main__':
     primeur = Primeur()
-    
+
+    monPremierPotager = Potager(10, 10)
+    print("aire de mon potager %d" % monPremierPotager.aire)
+    primeur.entreDansUnPotager(monPremierPotager)
+
+
     maPremiereZoneFruit1 = ZoneFruits(10, 10)
+    print("aire de ma zone fruit %d" % maPremiereZoneFruit1.aire)
     primeur.ajouteZone(maPremiereZoneFruit1)
 
-    #maPremiereZoneLegume1 = ZoneLegumes(10, 10)
-    #primeur.ajouteZone(maPremiereZoneLegume1)
+    maPremiereZoneLegume1 = ZoneLegumes(10, 10)
+    print("aire de ma zone legume %d" % maPremiereZoneLegume1.aire)
+    primeur.ajouteZone(maPremiereZoneLegume1)
 
     patate = Legume("patate")
     radis = Legume("radis")
     carotte = Legume("carotte")
     
     mangue = Fruit("mangue")
-
+    
     primeur.plante(mangue)
-    print(maPremiereZoneFruit1._fruits)
-
-    primeur.plante(patate)
-    #primeur.plante(radis)
-    #primeur.plante(carotte)
+    primeur.sortDunPotager()
