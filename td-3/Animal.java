@@ -5,7 +5,13 @@ public class Animal
 
 	enum Classification
 	{
-		POISSON(0),	INSECTE(1),	OISEAU(2),	MAMMIFERE(3), AMPHIBIEN(4), REPTILE(5), INVERTEBRE(6);
+		POISSON(0)   ,
+		INSECTE(1)   ,
+		OISEAU(2)    ,
+		MAMMIFERE(3) ,
+		AMPHIBIEN(4) ,
+		REPTILE(5)   ,
+		INVERTEBRE(6);
 
 		private int value;
 
