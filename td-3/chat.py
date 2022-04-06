@@ -22,9 +22,11 @@ class Animal():
 		self._classification = classification
 		self._name = name
 
+	@property
 	def getClassification(self):
 		return self._classification
 	
+	@property
 	def getName(self):
 		return self._name
 		
