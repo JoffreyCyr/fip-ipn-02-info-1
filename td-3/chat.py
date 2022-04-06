@@ -17,7 +17,7 @@ class Animal():
 
 	def __init__(self, classification, name):
 		if not isinstance(classification,Classification) or not isinstance(name,str) :
-			raise ArgumentTypeError
+			raise ArgumentTypeError("classification must be a Classification and name must be a string")
 
 		self._classification = classification
 		self._name = name
@@ -35,7 +35,7 @@ class Chat(Animal):
 
 	def __init__(self, name):
 		if not isinstance(name,str):
-			raise ArgumentTypeError
+			raise ArgumentTypeError("name must be a string")
 		super().__init__(Classification.MAMMIFERE, name)
 
 
@@ -45,7 +45,7 @@ class Chien(Animal):
 
 	def __init__(self, name):
 		if not isinstance(name,str):
-			raise ArgumentTypeError
+			raise ArgumentTypeError("name must be a string")
 		super().__init__(Classification.MAMMIFERE, name)
 
 chien = Chien("Guimauve")
