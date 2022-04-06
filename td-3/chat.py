@@ -31,6 +31,16 @@ class Animal():
 
 class Chat(Animal):
 
+	isCute = False
+
+	def __init__(self, name):
+		if not isinstance(name,str):
+			raise ArgumentTypeError
+		super().__init__(Classification.MAMMIFERE, name)
+
+
+class Chien(Animal):
+
 	isCute = True
 
 	def __init__(self, name):
