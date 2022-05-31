@@ -1,8 +1,6 @@
 from argparse import ArgumentError, ArgumentTypeError
 from enum import Enum
 
-#test
-
 class TypeBillet(Enum):
     PleinTarif = 0
     Etudiant = 1
