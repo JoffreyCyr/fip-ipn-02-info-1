@@ -15,7 +15,7 @@ class Commande():
 	_quantite = 0
 	_prix = 0
 
-	def __init__(self, jus, quantite, taille=Taille.Petit) :
+	def __init__(self, jus, quantite, taille) :
 		if isinstance(jus,Jus) : self._jus=jus
 		else : raise ArgumentTypeError
 
@@ -55,12 +55,12 @@ class Jus():
 		else : raise ArgumentTypeError
 
 		if isinstance(ingredients,dict) :
-			if all( isinstance(cles,Ingredient) for cles in ingredients.keys ) :
-				self._ingredients=ingredients
-			else : raise ArgumentTypeError
+			#if all( isinstance(cles,Ingredient) for cles in ingredients.keys ) :
+			self._ingredients=ingredients
+			#else : raise ArgumentTypeError
 		else : raise ArgumentTypeError
 
-		if isinstance(prix,float) : self._prix=prix
+		if isinstance(prix,float) or isinstance(prix,int): self._prix=prix
 		else : raise ArgumentTypeError
 
 	@property
@@ -84,7 +84,7 @@ class Ingredient():
 		if isinstance(nom,str) : self._nom=nom
 		else : raise ArgumentTypeError
 
-		if isinstance(nom,float) : self._quantite=quantite
+		if isinstance(quantite,float) or isinstance(quantite,int) : self._quantite=quantite
 		else : raise ArgumentTypeError
 
 	@property
@@ -128,10 +128,35 @@ class Barman() :
 				i.key.quantite = i.key.quantite - i.value * commande.jus.quantite
 
 	def payer(self, somme):
-		if not isinstance(somme,float) : raise ArgumentTypeError
+		if not (isinstance(somme,float) or isinstance(somme,int)) : raise ArgumentTypeError
 		self._note -= somme
 		return self._note
 
 	def terminer(self, texte="terminée"):
 		self._listeCommande.clear()
 		print(f"Commande {texte}")
+
+if __name__ == '__main__' :
+
+	mangue = Ingredient("Mangue",10)
+	orange = Ingredient("Orange",10)
+	guajana = Ingredient("Guajana",10)
+	pomme = Ingredient("Pomme",10)
+	gingembre = Ingredient("Gingembre",10)
+	citron = Ingredient("Citron",10)
+	goyave = Ingredient("Goyave",10)
+	ananas = Ingredient("Ananas",10)
+	banane = Ingredient("Banane",10)
+	carotte = Ingredient("Carotte",10)
+	celeri = Ingredient("Celeri",10)
+	betterave = Ingredient("Betterave",10)
+
+
+	listeJus = [
+		Jus("The Boost",{mangue:0.5,orange:2,guajana:1},5),
+		Jus("The Fresh",{pomme:3,gingembre:1,citron:1},4),
+		Jus("The Fusion",{goyave:1,ananas:0.25,banane:0.5},5),
+		Jus("The Detox",{carotte:3,celeri:1,betterave:1},3.5)
+	]
+
+	barman = Barman(listeJus)
