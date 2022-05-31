@@ -1,11 +1,10 @@
 from argparse import ArgumentTypeError
 from enum import Enum
 
-
 class Taille(Enum) :
-	Petit : 0
-	Moyen : 0.5
-	Grand : 1
+	Petit = 0
+	Moyen = 0.5
+	Grand = 1
 	# Valeur du surcoût
 
 
@@ -25,7 +24,7 @@ class Commande():
 		if isinstance(taille,Taille) : self._taille=taille
 		else : raise ArgumentTypeError
 
-		self._prix = ( jus.prix + taille ) * quantite
+		self._prix = ( jus.prix + taille.value ) * quantite
 
 	@property
 	def jus(self):
@@ -73,7 +72,7 @@ class Jus():
 
 	@property
 	def prix(self) :
-		return self.prix
+		return self._prix
 
 
 class Ingredient():
@@ -95,11 +94,13 @@ class Ingredient():
 	def quantite(self):
 		return self._quantite
 
+	def setQuantite(self,qte) :
+		self._quantite=qte
+
 
 class Barman() :
 	_listeJus = list()
 	_listeCommande = list()
-	_chiffreAffaires = 0
 	_note = 0
 
 	def __init__(self,listeJus):
@@ -111,12 +112,22 @@ class Barman() :
 		else :
 			raise ArgumentTypeError
 
+	@property
+	def note(self):
+		return self._note
+
+	@property
+	def listeCommande(self):
+		return self._listeCommande
+
 	def demanderBoissons(self) :
 		return self._listeJus
 
-	def verifierQuantite(commande):
+	def verifierQuantite(self, commande):
 		if not isinstance(commande, Commande): raise ArgumentTypeError
-		return all( i.key.quantite - i.value * commande.jus.quantite for i in commande.jus.ingredients )
+		for i in commande.jus.ingredients :
+			if i.quantite - commande.jus.ingredients[i] * commande.quantite < 0 : return False
+		return True
 
 	def ajouterCommande(self, commande) :
 		if not isinstance(commande,Commande) : raise ArgumentTypeError
@@ -125,7 +136,9 @@ class Barman() :
 			self._listeCommande.append(commande)
 			self._note += commande.prix
 			for i in commande.jus.ingredients :
-				i.key.quantite = i.key.quantite - i.value * commande.jus.quantite
+				i.setQuantite(i.quantite - commande.jus.ingredients[i] * commande.quantite)
+			return True
+		return False
 
 	def payer(self, somme):
 		if not (isinstance(somme,float) or isinstance(somme,int)) : raise ArgumentTypeError
@@ -134,6 +147,7 @@ class Barman() :
 
 	def terminer(self, texte="terminée"):
 		self._listeCommande.clear()
+		self._note = 0
 		print(f"Commande {texte}")
 
 if __name__ == '__main__' :
@@ -160,3 +174,23 @@ if __name__ == '__main__' :
 	]
 
 	barman = Barman(listeJus)
+
+
+	carte = barman.demanderBoissons()
+	for c in carte :
+		print(f"{c.nom} : {c.prix}$")
+
+	# True si quantité d'ingrédients suffisante, False si quantité insuffisante
+	print(barman.ajouterCommande( Commande(carte[0],5,Taille.Moyen) ))
+	#print(barman.ajouterCommande( Commande(carte[0],6,Taille.Petit) ))
+
+	#barman.terminer("annulée")
+
+	while barman.note > 0 :
+		print(f"Reste à payer : {barman.note}")
+		barman.payer(int(input("somme : ")))
+
+	if barman.note < 0 :
+		print(f"Rendu : {abs(barman.note)}")
+
+	barman.terminer()
